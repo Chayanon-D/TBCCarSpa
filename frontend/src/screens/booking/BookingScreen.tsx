@@ -144,10 +144,13 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
     return total;
   };
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const handleConfirmBooking = async () => {
     if (!selectedService || !selectedBranch) return;
 
     setSubmitting(true);
+    setErrorMessage(null);
     try {
       const res = await apiService.createBooking(
         {
@@ -169,24 +172,11 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
       setTimeout(() => {
         onNavigate('booking_success');
       }, res.fifoInfo?.isShopFull ? 2500 : 300);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Booking submission failed:', err);
-      const bookingRef = 'BK-2026-' + Math.floor(1000 + Math.random() * 9000);
-      const totalPrice = calculateTotalPrice();
-      const fallbackBooking: BookingRecord = {
-        id: 'b_' + Date.now(),
-        bookingRef,
-        service: selectedService,
-        vehicle: selectedVehicle,
-        branch: selectedBranch,
-        date: selectedDate,
-        time: selectedTime,
-        status: 'Confirmed',
-        totalAmount: totalPrice,
-        pointsEarned: Math.floor(totalPrice / 10),
-      };
-      onAddBooking(fallbackBooking);
-      onNavigate('booking_success');
+      setErrorMessage(
+        '⚠️ ไม่สามารถส่งข้อมูลการจองไปยังเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วลองกด "ยืนยันการจอง" อีกครั้ง'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -269,6 +259,12 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
           capacityNote: t.book_capacity_note,
         }}
       />
+
+      {errorMessage && (
+        <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs font-medium leading-relaxed animate-fade-in">
+          {errorMessage}
+        </div>
+      )}
 
       {/* Summary & Confirm Button */}
       <BookingSummary

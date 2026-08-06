@@ -20,8 +20,8 @@ const getHeaders = (lineUserId?: string) => ({
   ...(lineUserId ? { 'x-line-user-id': lineUserId } : {}),
 });
 
-// Helper for fetch with 3-second timeout protection
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 3000): Promise<Response> {
+// Helper for fetch with 15-second timeout protection (accommodating Render cold starts)
+async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 15000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
