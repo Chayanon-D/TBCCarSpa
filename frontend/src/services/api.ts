@@ -37,6 +37,18 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
   }
 }
 
+async function parseJsonResponse<T>(res: Response): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('text/html')) {
+    throw new Error('Server returned HTML instead of JSON');
+  }
+  try {
+    return await res.json();
+  } catch (err) {
+    throw new Error('Invalid JSON response');
+  }
+}
+
 export interface SlotAvailability {
   date: string;
   slots: Array<{
@@ -129,12 +141,12 @@ export const apiService = {
     if (!res.ok) {
       let errMsg = 'Failed to create booking';
       try {
-        const errJson = await res.json();
+        const errJson = await parseJsonResponse<any>(res);
         if (errJson.error || errJson.message) errMsg = errJson.error || errJson.message;
       } catch {}
       throw new Error(errMsg);
     }
-    return res.json();
+    return parseJsonResponse(res);
   },
 
   // Vehicles

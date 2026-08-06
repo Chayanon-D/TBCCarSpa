@@ -29,8 +29,15 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenId>('splash');
   const { dbUser, liffUser, setDbUser, loading } = useLiff();
 
-  // Local state fallbacks
-  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  // Local state fallbacks with localStorage persistence
+  const [bookings, setBookings] = useState<BookingRecord[]>(() => {
+    try {
+      const stored = localStorage.getItem('tbc_user_bookings');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [latestBooking, setLatestBooking] = useState<BookingRecord | null>(null);
   const [liveStatus, setLiveStatus] = useState<CarLiveStatus | null>(null);
   const [lang, setLang] = useState<'th' | 'en'>(() => {
@@ -92,7 +99,15 @@ export default function App() {
   };
 
   const handleAddBooking = (record: BookingRecord) => {
-    setBookings((prev) => [record, ...prev]);
+    setBookings((prev) => {
+      const next = [record, ...prev];
+      try {
+        localStorage.setItem('tbc_user_bookings', JSON.stringify(next));
+      } catch (e) {
+        console.error('Failed to cache bookings in localStorage:', e);
+      }
+      return next;
+    });
     setLatestBooking(record);
     setDbUser((prev) =>
       prev
