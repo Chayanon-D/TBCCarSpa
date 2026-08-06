@@ -117,6 +117,7 @@ export const apiService = {
       branchId: string;
       date: string;
       time: string;
+      vehicle?: Vehicle;
     },
     lineUserId?: string
   ): Promise<BookingRecord & { fifoInfo?: any }> {
@@ -125,7 +126,14 @@ export const apiService = {
       headers: getHeaders(lineUserId),
       body: JSON.stringify(bookingData),
     });
-    if (!res.ok) throw new Error('Failed to create booking');
+    if (!res.ok) {
+      let errMsg = 'Failed to create booking';
+      try {
+        const errJson = await res.json();
+        if (errJson.error || errJson.message) errMsg = errJson.error || errJson.message;
+      } catch {}
+      throw new Error(errMsg);
+    }
     return res.json();
   },
 

@@ -160,6 +160,7 @@ export const BookingScreen: React.FC<BookingScreenProps> = ({
           branchId: selectedBranch.id,
           date: selectedDate,
           time: selectedTime,
+          vehicle: selectedVehicle,
         },
         user.lineUserId
       );
