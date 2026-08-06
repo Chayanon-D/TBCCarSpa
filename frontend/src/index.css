@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0D0D0F;
+    color: #ffffff;
+    font-family: 'Prompt', sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Base styles for premium UI elements */
+@layer components {
+  /* Minimal Button - Primary */
+  .btn-primary {
+    @apply bg-[#D81E25] text-white font-bold h-[56px] rounded-[24px] px-6 flex items-center justify-center transition-transform active:scale-[0.98];
+  }
+  
+  /* Minimal Button - Secondary */
+  .btn-secondary {
+    @apply bg-[#1A1B1F] text-[#BDBDBD] font-bold h-[56px] rounded-[24px] px-6 flex items-center justify-center transition-transform active:scale-[0.98] border border-[#2B2D31];
+  }
+
+  /* Minimal Button - Ghost */
+  .btn-ghost {
+    @apply bg-transparent text-white font-bold h-[56px] rounded-[24px] px-6 flex items-center justify-center transition-transform active:scale-[0.98];
+  }
+
+  /* Premium Card Base */
+  .card-premium {
+    @apply bg-[#1A1B1F] rounded-[24px] border border-[#2B2D31] shadow-sm;
+  }
+}

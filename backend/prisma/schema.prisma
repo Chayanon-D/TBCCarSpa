@@ -1,0 +1,166 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String             @id @default(uuid())
+  lineUserId      String?            @unique
+  lineDisplayName String?
+  linePictureUrl  String?
+  firstName       String             @default("สมชาย")
+  lastName        String             @default("ใจดี")
+  phone           String             @default("081-234-5678")
+  email           String             @default("somchai@tbc-carspa.com")
+  dob             String             @default("1992-05-15")
+  province        String             @default("กรุงเทพมหานคร")
+  memberId        String             @unique @default("TBC-88992")
+  memberLevel     String             @default("Gold VIP")
+  points          Int                @default(1250)
+  usageCount      Int                @default(12)
+  pdpaAccepted    Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  vehicles        Vehicle[]
+  bookings        Booking[]
+  pointHistory    PointTransaction[]
+  notifications   Notification[]
+}
+
+model Vehicle {
+  id           String    @id @default(uuid())
+  licensePlate String
+  brand        String
+  model        String
+  color        String
+  year         String
+  isPrimary    Boolean   @default(false)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookings     Booking[]
+}
+
+model SpaService {
+  id              String    @id @default(uuid())
+  name            String
+  description     String
+  durationMinutes Int
+  priceTHB        Float
+  category        String
+  pointsEarned    Int
+  popular         Boolean   @default(false)
+  badge           String?
+  steps           String?   // JSON string array
+  addons          String?   // JSON string array of { name, priceTHB, note }
+  note            String?
+
+  bookings        Booking[]
+}
+
+model SpaBranch {
+  id        String    @id @default(uuid())
+  name      String
+  address   String
+  phone     String
+  distance  String
+  openHours String
+
+  bookings  Booking[]
+}
+
+model Booking {
+  id              String         @id @default(uuid())
+  bookingRef      String         @unique
+  date            String
+  time            String
+  status          String         @default("Confirmed") // Confirmed, In Progress, Completed, Cancelled
+  totalAmount     Float
+  depositAmount   Float          @default(300)
+  remainingAmount Float          @default(0)
+  slipUrl         String?
+  paymentStatus   String         @default("Deposit Paid")
+  pointsEarned    Int
+  qrCode          String?
+
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+
+  serviceId       String
+  service         SpaService     @relation(fields: [serviceId], references: [id])
+
+  vehicleId       String
+  vehicle         Vehicle        @relation(fields: [vehicleId], references: [id])
+
+  branchId        String
+  branch          SpaBranch      @relation(fields: [branchId], references: [id])
+
+  carLiveStatus   CarLiveStatus?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model CarLiveStatus {
+  id                   String   @id @default(uuid())
+  bookingId            String   @unique
+  booking              Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  currentStep          Int      @default(3)
+  estimatedFinishTime  String   @default("16:30 น.")
+  bayNumber            String   @default("Bay 03 (Coating Room)")
+  technicianName       String   @default("ช่างวิชัย & ทีมงานมืออาชีพ")
+  stages               String   // JSON string of stages array
+  photoProgressUrl     String?
+  updatedAt            DateTime @updatedAt
+}
+
+model PointTransaction {
+  id        String   @id @default(uuid())
+  title     String
+  date      String
+  amount    Int
+  type      String   // earn, redeem
+  category  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model RewardItem {
+  id          String  @id @default(uuid())
+  title       String
+  description String
+  ptsRequired Int
+  category    String
+  isAvailable Boolean @default(true)
+  code        String?
+}
+
+model PromotionCoupon {
+  id             String  @id @default(uuid())
+  title          String
+  description    String
+  code           String  @unique
+  discountBadge  String
+  validUntil     String
+  minSpendTHB    Float
+  isClaimed      Boolean @default(false)
+  bannerGradient String
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  time      String
+  read      Boolean  @default(false)
+  type      String   // status, booking, promo, system
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}

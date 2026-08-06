@@ -1,0 +1,6 @@
+{
+  "name": "TBC CAR SPA - LINE LIFF App",
+  "description": "Luxury Modern LINE LIFF Application for TBC Car Spa with queue booking, member points, vehicle tracking, and Figma UI Design System.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
