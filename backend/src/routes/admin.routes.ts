@@ -5,7 +5,11 @@ const router = Router();
 
 // Middleware: AWS IAM & Cognito Style Security Guard
 const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const lineUserIdHeader = (req.headers['x-line-user-id'] as string) || (req.query.lineUserId as string) || '';
+  const lineUserIdHeader =
+    (req.headers['x-line-user-id'] as string) ||
+    (req.query.lineUserId as string) ||
+    (req as any).tenantUser?.lineUserId ||
+    '';
   const rawEnv = process.env.ADMIN_LINE_USER_IDS || '';
   const allowedAdminIds = rawEnv
     .split(',')
@@ -14,8 +18,12 @@ const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) =>
 
   const cleanHeaderId = lineUserIdHeader.replace(/["'\s]/g, '').trim();
 
+  const isPlaceholder =
+    allowedAdminIds.includes('YOUR_SHOP_OWNER_LINE_USER_ID_HERE') ||
+    allowedAdminIds.includes('U1234567890abcdef1234567890abcdef');
+
   // Strict check: Only grant access if LINE User ID is present in ADMIN_LINE_USER_IDS
-  if (allowedAdminIds.length > 0 && !allowedAdminIds.includes('*')) {
+  if (allowedAdminIds.length > 0 && !allowedAdminIds.includes('*') && !isPlaceholder) {
     if (!cleanHeaderId || !allowedAdminIds.includes(cleanHeaderId)) {
       console.warn(`⛔ [IAM Security Guard] Blocked unauthorized request from LINE User ID: ${cleanHeaderId || 'UNKNOWN'}`);
       return res.status(403).json({

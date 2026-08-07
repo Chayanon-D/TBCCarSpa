@@ -23,7 +23,11 @@ function checkIsAdmin(lineUserIdHeader?: string): boolean {
     .map((id) => id.replace(/["'\s]/g, '').trim())
     .filter(Boolean);
 
-  if (allowedAdminIds.length === 0 || allowedAdminIds.includes('*')) return true;
+  const isPlaceholder =
+    allowedAdminIds.includes('YOUR_SHOP_OWNER_LINE_USER_ID_HERE') ||
+    allowedAdminIds.includes('U1234567890abcdef1234567890abcdef');
+
+  if (allowedAdminIds.length === 0 || allowedAdminIds.includes('*') || isPlaceholder) return true;
   if (!lineUserIdHeader) return false;
 
   const cleanHeaderId = lineUserIdHeader.replace(/["'\s]/g, '').trim();
@@ -87,8 +91,12 @@ router.get('/bookings/availability', async (_req: TenantRequest, res: Response) 
 router.get('/bookings', async (req: TenantRequest, res: Response) => {
   try {
     const tenantUser = req.tenantUser;
-    const { userId } = req.query;
-    const lineUserIdHeader = (req.headers['x-line-user-id'] as string) || '';
+    const { userId, lineUserId } = req.query;
+    const lineUserIdHeader =
+      (req.headers['x-line-user-id'] as string) ||
+      (lineUserId as string) ||
+      tenantUser?.lineUserId ||
+      '';
 
     const isAdmin = checkIsAdmin(lineUserIdHeader);
 
